@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 5 - Database Management</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Lab 5</h1>
+        <p class="subtitle">Database Management Interface</p>
+
+        <!-- Insert Section -->
+        <section class="section">
+            <h3>Insert Data</h3>
+            <p>Insert default patient records into the database.</p>
+            <button id="insert-btn">Insert Sample Data</button>
+        </section>
+
+        <!-- Query Section -->
+        <section class="section">
+            <h3>Query Database</h3>
+            <p>Enter a SQL statement to retrieve data.</p>
+            <textarea id="sql-query" placeholder="Enter your SQL query here..."></textarea>
+            <button id="query-btn">Execute Query</button>
+        </section>
+
+        <!-- Response Section -->
+        <section class="section">
+            <h3>Server Response</h3>
+            <div id="response-area"></div>
+        </section>
+    </div>
+
+    <script src="lang/en/en.js"></script>
+    <script src="js/client.js"></script>
+</body>
+</html> 
