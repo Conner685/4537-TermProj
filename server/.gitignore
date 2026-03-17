@@ -1,4 +1,5 @@
 node_modules/
+SQL-Queries/
 .env
 ca-certificate.crt
 logs
