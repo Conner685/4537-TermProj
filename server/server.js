@@ -1,4 +1,3 @@
-// Dependencies
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -13,6 +12,8 @@ const db = mysql.createConnection(dbConfig);
 
 const app = express();
 app.use(express.json());
+app.use(cors());
+
 const PORT = process.env.PORT || 8888;
 const JWT_SECRET = process.env.JWT_SECRET;
 
