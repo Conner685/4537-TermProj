@@ -1,119 +1,159 @@
-class UIComponent {
-    constructor(elementId) {
-        this.element = document.getElementById(elementId);
-    }
-    
-    setText(text) {
-        if(this.element) this.element.textContent = text;
-    }
-    
-    setHTML(html) {
-        if(this.element) this.element.innerHTML = html;
-    }
-    
-    getValue() {
-        return this.element ? this.element.value : '';
-    }
-}
-
 class ClientApp {
     constructor() {
-        this.responseArea = new UIComponent('response-area');
-
-        document.getElementById('insert-btn').innerText = STRINGS.insertBtn;
-        document.getElementById('query-btn').innerText = STRINGS.submitBtn;
-        document.getElementById('sql-query').placeholder = STRINGS.placeholder;        
+        this.API_BASE_URL = 'http://localhost:8888/api'; //CHANGE LATER
         
-        document.getElementById('insert-btn').onclick = () => this.handleInsert();
-        document.getElementById('query-btn').onclick = () => this.handleQuery();
-    }
-
-    /**
-     * Format JSON with syntax highlighting
-     */
-    formatJsonResponse(data, isSuccess = true) {
-        const jsonString = JSON.stringify(data, null, 2);
-        const statusClass = isSuccess ? 'response-success' : 'response-error';
-        const icon = isSuccess ? '✓' : '✕';
+        this.views = {
+            login: document.getElementById('login-view'),
+            register: document.getElementById('register-view'),
+            user: document.getElementById('user-view'),
+            admin: document.getElementById('admin-view')
+        };
+        this.logoutBtn = document.getElementById('logout-btn');
+        this.alertBox = document.getElementById('alert-box');
+        this.quotaDisplay = document.getElementById('api-quota-display');
         
-        const hoverableJson = jsonString
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
-            .replace(/: "([^"]*)"/g, ': <span class="json-string">"$1"</span>')
-            .replace(/: (\d+)/g, ': <span class="json-number">$1</span>')
-            .replace(/: (true|false|null)/g, ': <span class="json-boolean">$1</span>');
-
-        return `
-            <div class="response-card ${statusClass}">
-                <div class="response-header">
-                    <span class="response-icon">${icon}</span>
-                    <span class="response-status">${isSuccess ? 'Success' : 'Error'}</span>
-                </div>
-                <pre class="response-json"><code>${hoverableJson}</code></pre>
-            </div>
-        `;
+        this.bindEvents();
+        this.checkAuthStatus();
     }
 
-    /**
-     * Show loading state
-     */
-    showLoading(message) {
-        const html = `
-            <div class="response-card response-loading">
-                <div class="response-header">
-                    <span class="response-spinner"></span>
-                    <span class="response-status">${message}</span>
-                </div>
-            </div>
-        `;
-        this.responseArea.setHTML(html);
-    }
-
-    /**
-     * Show error state
-     */
-    showError(error) {
-        const html = `
-            <div class="response-card response-error">
-                <div class="response-header">
-                    <span class="response-icon">✕</span>
-                    <span class="response-status">Error</span>
-                </div>
-                <pre class="response-message">${error}</pre>
-            </div>
-        `;
-        this.responseArea.setHTML(html);
-    }
-
-    handleInsert() {
-        this.showLoading(STRINGS.inserting);
+    bindEvents() {
+        document.getElementById('show-register').onclick = (e) => { e.preventDefault(); this.switchView('register'); };
+        document.getElementById('show-login').onclick = (e) => { e.preventDefault(); this.switchView('login'); };
         
-        fetch(STRINGS.insertUrl, { method: 'POST' })
-            .then(res => res.json())
-            .then(data => {
-                const isSuccess = !data.error;
-                this.responseArea.setHTML(this.formatJsonResponse(data, isSuccess));
-            })
-            .catch(err => this.showError(STRINGS.errorPrefix + err.message));
+        document.getElementById('login-form').onsubmit = (e) => this.handleLogin(e);
+        document.getElementById('register-form').onsubmit = (e) => this.handleRegister(e);
+        
+        this.logoutBtn.onclick = () => this.handleLogout();
+        
+        const testBtn = document.getElementById('test-api-btn');
+        if(testBtn) testBtn.onclick = () => this.testProtectedAPI();
     }
 
-    handleQuery() {
-        const queryInput = new UIComponent('sql-query').getValue();
-        if(!queryInput) return;
+    switchView(viewName) {
+        Object.values(this.views).forEach(view => {
+            if(view) view.classList.add('hidden');
+        });
 
-        this.showLoading(STRINGS.runningQuery);
+        if(this.views[viewName]) this.views[viewName].classList.remove('hidden');
+        
+        if(viewName === 'login' || viewName === 'register') {
+            this.logoutBtn.classList.add('hidden');
+        } else {
+            this.logoutBtn.classList.remove('hidden');
+        }
+    }
 
-        const encodedQuery = encodeURIComponent(queryInput);
+    showAlert(message, isError = true) {
+        this.alertBox.textContent = message;
+        this.alertBox.className = isError ? 'response-error response-card' : 'response-success response-card';
+        this.alertBox.classList.remove('hidden');
+        setTimeout(() => this.alertBox.classList.add('hidden'), 4000);
+    }
 
-        fetch(`${STRINGS.queryUrl}?q=${encodedQuery}`, { method: 'GET' })
-            .then(res => res.json())
-            .then(data => {
-                const isSuccess = !data.error;
-                this.responseArea.setHTML(this.formatJsonResponse(data, isSuccess));
-            })
-            .catch(err => this.showError(STRINGS.errorPrefix + err.message));
+    checkAuthStatus() {
+        const token = localStorage.getItem('jwt_token');
+        const role = localStorage.getItem('user_role');
+        const quota = localStorage.getItem('api_quota');
+
+        if (token) {
+            if (role === 'admin') {
+                this.switchView('admin');
+            } else {
+                this.switchView('user');
+                if(this.quotaDisplay) this.quotaDisplay.textContent = quota || '20';
+            }
+        } else {
+            this.switchView('login');
+        }
+    }
+
+    async handleLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('jwt_token', data.token);
+                localStorage.setItem('user_role', data.role);
+                localStorage.setItem('api_quota', data.api_calls_remaining);
+                
+                this.checkAuthStatus(); 
+                this.showAlert('Login successful!', false);
+            } else {
+                this.showAlert(data.error || 'Login failed');
+            }
+        } catch (error) {
+            this.showAlert('Cannot connect to server');
+        }
+    }
+
+    async handleRegister(e) {
+        e.preventDefault();
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.showAlert('Registration successful! Please log in.', false);
+                this.switchView('login');
+            } else {
+                this.showAlert(data.error || 'Registration failed');
+            }
+        } catch (error) {
+            this.showAlert('Cannot connect to server');
+        }
+    }
+
+    handleLogout() {
+        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('user_role');
+        localStorage.removeItem('api_quota');
+        this.checkAuthStatus();
+        this.showAlert('You have been logged out.', false);
+    }
+
+    async testProtectedAPI() {
+        const token = localStorage.getItem('jwt_token');
+        
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/ai/ask`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                }
+            });
+            
+            const data = await response.json();
+            
+            if(response.ok) {
+                this.showAlert(data.message, false);
+            } else {
+                this.showAlert(data.error || 'API call failed');
+                if(response.status === 401 || response.status === 403) {
+                    this.handleLogout(); 
+                }
+            }
+        } catch (error) {
+            this.showAlert('Error calling API');
+        }
     }
 }
 

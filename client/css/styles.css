@@ -276,3 +276,68 @@ button:disabled {
 #response-area::-webkit-scrollbar-thumb:hover {
     background: #764ba2;
 }
+
+.hidden {
+    display: none !important;
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+}
+
+.app-header h1 {
+    margin: 0;
+    font-size: 1.8em;
+}
+
+#logout-btn {
+    background: #e53935;
+    padding: 8px 15px;
+    font-size: 0.9em;
+}
+
+#logout-btn:hover {
+    background: #c62828;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0 15px 0;
+    border: 2px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.stats-card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+}
+
+.quota-number {
+    font-size: 3em;
+    font-weight: bold;
+    color: #667eea;
+    margin: 10px 0;
+}
+
+#alert-box {
+    margin-bottom: 20px;
+}

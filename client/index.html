@@ -3,37 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab 5 - Database Management</title>
+    <title>AI Telephony Agent - API Platform</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Lab 5</h1>
-        <p class="subtitle">Database Management Interface</p>
+        <header class="app-header">
+            <h1>AI Voice Platform</h1>
+            <button id="logout-btn" class="hidden">Logout</button>
+        </header>
 
-        <!-- Insert Section -->
-        <section class="section">
-            <h3>Insert Data</h3>
-            <p>Insert default patient records into the database.</p>
-            <button id="insert-btn">Insert Sample Data</button>
+        <div id="alert-box" class="hidden"></div>
+
+        <section id="login-view" class="section">
+            <h3>Login</h3>
+            <form id="login-form">
+                <input type="email" id="login-email" placeholder="Email Address" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button type="submit">Sign In</button>
+            </form>
+            <p>Don't have an account? <a href="#" id="show-register">Register here</a></p>
         </section>
 
-        <!-- Query Section -->
-        <section class="section">
-            <h3>Query Database</h3>
-            <p>Enter a SQL statement to retrieve data.</p>
-            <textarea id="sql-query" placeholder="Enter your SQL query here..."></textarea>
-            <button id="query-btn">Execute Query</button>
+        <section id="register-view" class="section hidden">
+            <h3>Create Account</h3>
+            <form id="register-form">
+                <input type="email" id="register-email" placeholder="Email Address" required>
+                <input type="password" id="register-password" placeholder="Password" required>
+                <button type="submit">Register</button>
+            </form>
+            <p>Already have an account? <a href="#" id="show-login">Login here</a></p>
         </section>
 
-        <!-- Response Section -->
-        <section class="section">
-            <h3>Server Response</h3>
+        <section id="user-view" class="section hidden">
+            <h3>User Dashboard</h3>
+            <p>Welcome back! Here is your API usage:</p>
+            <div class="stats-card">
+                <h4>API Calls Remaining</h4>
+                <p id="api-quota-display" class="quota-number">...</p>
+            </div>
+            <button id="test-api-btn">Test AI Endpoint (Consumes 1 call)</button>
             <div id="response-area"></div>
         </section>
+
+        <section id="admin-view" class="section hidden">
+            <h3>Admin Dashboard</h3>
+            <p>System Overview & User Management</p>
+            <div class="stats-card response-success">
+                <h4>System Status</h4>
+                <p>All microservices operational.</p>
+            </div>
+            </section>
     </div>
 
-    <script src="lang/en/en.js"></script>
     <script src="js/client.js"></script>
 </body>
-</html> 
+</html>
