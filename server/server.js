@@ -38,14 +38,19 @@ class Server {
     }
 
     configureRoutes() {
+        this.app.get('/', (req, res) => {
+            res.status(200).send(`
+                <div style="font-family: sans-serif; padding: 40px; text-align: center;">
+                    <h1 style="color: #667eea;">AI Telephony API Server is Online</h1>
+                    <p>All microservices are running. Send API requests to the <strong>/api</strong> endpoints.</p>
+                </div>
+            `);
+        });
+
         this.app.post('/api/register', (req, res) => this.authController.register(req, res));
         this.app.post('/api/login', (req, res) => this.authController.login(req, res));
 
-        this.app.post('/api/ai/ask', AuthMiddleware.verifyToken, (req, res) => {
-            res.status(200).json({ 
-                message: `Welcome ${req.user.email}!` 
-            });
-        });
+        this.app.post('/api/ai/ask', AuthMiddleware.verifyToken, (req, res) => this.aiController.handleAsk(req, res));
     }
 
     start() {
