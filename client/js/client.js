@@ -1,6 +1,6 @@
 class ClientApp {
     constructor() {
-        this.API_BASE_URL = 'http://localhost:8888/api'; //CHANGE LATER
+        this.API_BASE_URL = 'https://four537-termproj-server.onrender.com'; 
         
         this.views = {
             login: document.getElementById('login-view'),
