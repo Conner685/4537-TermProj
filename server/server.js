@@ -6,6 +6,7 @@ require('dotenv').config();
 const DatabaseConfig = require('./config_modules/configs.js');
 const AuthController = require('./controllers/AuthController.js');
 const AuthMiddleware = require('./middleware/auth.js');
+const AiController = require('./controllers/AiController.js');
 
 class Server {
     constructor() {
@@ -15,6 +16,7 @@ class Server {
         this.db = this.initializeDatabase();
         
         this.authController = new AuthController(this.db);
+        this.aiController = new AiController(this.db);
         
         this.configureMiddleware();
         this.configureRoutes();
