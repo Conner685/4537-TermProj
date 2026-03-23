@@ -23,10 +23,9 @@ class AiController {
             }
 
             try {
-                const HF_MODEL = 'HuggingFaceH4/zephyr-7b-beta';
-                const hfUrl = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`;    
-                            
-                const prompt = `<|system|>You are a professional, helpful virtual phone assistant.<|user|>Please start a phone conversation with a user. Your goal is: ${goal || 'To ask how their day is going.'}<|assistant|>`;
+                const hfUrl = `https://router.huggingface.co/v1/chat/completions`;
+                
+                const HF_MODEL = 'Qwen/Qwen2.5-7B-Instruct'; 
 
                 const hfResponse = await fetch(hfUrl, {
                     method: 'POST',
@@ -35,28 +34,30 @@ class AiController {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        inputs: prompt,
-                        parameters: { 
-                            max_new_tokens: 50, 
-                            return_full_text: false, 
-                            temperature: 0.7 
-                        }
+                        model: HF_MODEL,
+                        messages: [
+                            { 
+                                role: "system", 
+                                content: "You are a professional virtual phone assistant. Keep responses under 2 sentences." 
+                            },
+                            { 
+                                role: "user", 
+                                content: `Please start a phone conversation with ${targetPhone || 'a user'}. Your goal is: ${goal || 'To ask how their day is going.'}` 
+                            }
+                        ],
+                        max_tokens: 75, 
+                        temperature: 0.7 
                     })
                 });
 
+                if (!hfResponse.ok) {
+                    const errorText = await hfResponse.text();
+                    throw new Error(`API rejected request: ${hfResponse.status} - ${errorText}`);
+                }
+
                 const hfData = await hfResponse.json();
 
-                if (hfData.error && hfData.estimated_time) {
-                    return res.status(503).json({ 
-                        error: `The AI model is currently waking up. Please try again in ${Math.ceil(hfData.estimated_time)} seconds.` 
-                    });
-                }
-
-                if (!hfResponse.ok) {
-                    throw new Error(hfData.error || 'Failed to fetch from Hugging Face');
-                }
-
-                const generatedText = hfData[0].generated_text.trim();
+                const generatedText = hfData.choices[0].message.content.trim();
 
                 const transcript = `Call established with ${targetPhone || 'unknown number'}.\n\nAI Agent says:\n"${generatedText}"`;
 
