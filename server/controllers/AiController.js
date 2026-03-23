@@ -24,8 +24,8 @@ class AiController {
 
             try {
                 const HF_MODEL = 'HuggingFaceH4/zephyr-7b-beta';
-                const hfUrl = `https://api-inference.huggingface.co/models/${HF_MODEL}`;
-                
+                const hfUrl = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`;    
+                            
                 const prompt = `<|system|>You are a professional, helpful virtual phone assistant.<|user|>Please start a phone conversation with a user. Your goal is: ${goal || 'To ask how their day is going.'}<|assistant|>`;
 
                 const hfResponse = await fetch(hfUrl, {
