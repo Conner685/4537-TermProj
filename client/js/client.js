@@ -132,27 +132,46 @@ class ClientApp {
     async testProtectedAPI() {
         const token = localStorage.getItem('jwt_token');
         
+        const responseArea = document.getElementById('response-area');
+        responseArea.innerHTML = '<span class="response-spinner"></span> Calling AI... this may take a moment.';
+        
         try {
             const response = await fetch(`${this.API_BASE_URL}/ai/ask`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}` 
-                }
+                },
+                body: JSON.stringify({
+                    targetPhone: "555-0199",
+                    goal: "Promote the BCIT CST program, ask for feedback, and invite them to an info session."
+                })
             });
             
             const data = await response.json();
             
             if(response.ok) {
                 this.showAlert(data.message, false);
+                
+                responseArea.innerText = data.transcript;
+                
+                if(this.quotaDisplay) {
+                    this.quotaDisplay.textContent = data.api_calls_remaining;
+                }
+                localStorage.setItem('api_quota', data.api_calls_remaining);
+                
             } else {
                 this.showAlert(data.error || 'API call failed');
-                if(response.status === 401 || response.status === 403) {
+                responseArea.innerText = "Error: " + (data.error || 'Failed to connect to AI');
+                
+                if(response.status === 401 || response.status === 403 && data.error.includes("expired")) {
                     this.handleLogout(); 
                 }
             }
         } catch (error) {
-            this.showAlert('Error calling API');
+            console.error("Fetch Error:", error);
+            this.showAlert('Error calling API. Is the server running?');
+            responseArea.innerText = "Network Error: Could not reach the server.";
         }
     }
 }
