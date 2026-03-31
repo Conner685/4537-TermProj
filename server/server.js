@@ -7,6 +7,7 @@ const DatabaseConfig = require('./config_modules/configs.js');
 const AuthController = require('./controllers/AuthController.js');
 const AuthMiddleware = require('./middleware/auth.js');
 const AiController = require('./controllers/AiController.js');
+const AdminController = require('./controllers/AdminController.js');
 
 class Server {
     constructor() {
@@ -17,6 +18,7 @@ class Server {
         
         this.authController = new AuthController(this.db);
         this.aiController = new AiController(this.db);
+        this.adminController = new AdminController(this.db);
         
         this.configureMiddleware();
         this.configureRoutes();
@@ -53,6 +55,12 @@ class Server {
         this.app.post('/api/login', (req, res) => this.authController.login(req, res));
 
         this.app.post('/api/ai/ask', AuthMiddleware.verifyToken, (req, res) => this.aiController.handleAsk(req, res));
+
+        this.app.get('/api/admin/users', 
+            AuthMiddleware.verifyToken, 
+            AuthMiddleware.verifyAdmin, 
+            (req, res) => this.adminController.getUsers(req, res)
+        );
     }
 
     start() {
