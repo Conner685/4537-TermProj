@@ -53,7 +53,24 @@
                 <h4>System Status</h4>
                 <p>All microservices operational.</p>
             </div>
-            </section>
+            
+            <button id="load-users-btn">Refresh User Data</button>
+            
+            <div style="margin-top: 20px; overflow-x: auto;">
+                <table style="width: 100%; text-align: left; border-collapse: collapse; background: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <thead>
+                        <tr style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0;">
+                            <th style="padding: 12px;">ID</th>
+                            <th style="padding: 12px;">Email</th>
+                            <th style="padding: 12px;">Role</th>
+                            <th style="padding: 12px;">Quota Remaining</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-users-tbody">
+                        </tbody>
+                </table>
+            </div>
+        </section>
     </div>
 
     <script src="js/client.js"></script>

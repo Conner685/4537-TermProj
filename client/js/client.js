@@ -26,7 +26,10 @@ class ClientApp {
         this.logoutBtn.onclick = () => this.handleLogout();
         
         const testBtn = document.getElementById('test-api-btn');
-        if(testBtn) testBtn.onclick = () => this.testProtectedAPI();
+        if(testBtn) testBtn.onclick = () => this.testProtectedAPI()
+            
+        const loadUsersBtn = document.getElementById('load-users-btn');
+        if(loadUsersBtn) loadUsersBtn.onclick = () => this.fetchAdminData();;
     }
 
     switchView(viewName) {
@@ -58,6 +61,7 @@ class ClientApp {
         if (token) {
             if (role === 'admin') {
                 this.switchView('admin');
+                this.fetchAdminData();
             } else {
                 this.switchView('user');
                 if(this.quotaDisplay) this.quotaDisplay.textContent = quota || '20';
@@ -118,6 +122,54 @@ class ClientApp {
             }
         } catch (error) {
             this.showAlert('Cannot connect to server');
+        }
+    }
+
+    async fetchAdminData() {
+        const token = localStorage.getItem('jwt_token');
+        const tbody = document.getElementById('admin-users-tbody');
+        
+        if(!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="4" style="padding: 12px; text-align: center;">Loading user data...</td></tr>';
+
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/admin/users`, {
+                method: 'GET',
+                headers: { 
+                    'Authorization': `Bearer ${token}` 
+                }
+            });
+            
+            const data = await response.json();
+            
+            if(response.ok) {
+                tbody.innerHTML = '';
+                data.forEach(user => {
+                    const quotaColor = user.api_calls_remaining <= 0 ? '#d32f2f' : '#2e7d32';
+                    
+                    tbody.innerHTML += `
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 12px;">${user.id}</td>
+                            <td style="padding: 12px;">${user.email}</td>
+                            <td style="padding: 12px;">
+                                <span style="background: #e3f2fd; color: #1565c0; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">
+                                    ${user.role}
+                                </span>
+                            </td>
+                            <td style="padding: 12px; font-weight: bold; color: ${quotaColor};">
+                                ${user.api_calls_remaining}
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                this.showAlert(data.error || 'Failed to load users');
+                if(response.status === 401 || response.status === 403) {
+                    this.handleLogout();
+                }
+            }
+        } catch (error) {
+            this.showAlert('Error connecting to server to fetch admin data');
         }
     }
 
