@@ -60,7 +60,9 @@ class AiController {
 
             } catch (error) {
                 console.error("Telephony API Error:", error.message);
-                res.status(500).json({ error: 'Failed to initiate phone call. Quota not charged.' });
+                res.status(500).json({ 
+                    error: `Telephony API Error: ${error.message}` 
+                });
             }
         });
     }
