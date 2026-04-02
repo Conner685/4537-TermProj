@@ -56,6 +56,8 @@ class Server {
 
         this.app.post('/api/ai/ask', AuthMiddleware.verifyToken, (req, res) => this.aiController.handleAsk(req, res));
 
+        this.app.post('/api/webhook/call-complete', (req, res) => this.aiController.handleWebhook(req, res));
+
         this.app.get('/api/admin/users', 
             AuthMiddleware.verifyToken, 
             AuthMiddleware.verifyAdmin, 
