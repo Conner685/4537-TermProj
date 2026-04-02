@@ -183,9 +183,17 @@ class ClientApp {
 
     async testProtectedAPI() {
         const token = localStorage.getItem('jwt_token');
-        
         const responseArea = document.getElementById('response-area');
-        responseArea.innerHTML = '<span class="response-spinner"></span> Calling AI... this may take a moment.';
+        
+        const targetPhone = document.getElementById('target-phone').value.trim();
+        const goal = document.getElementById('ai-goal').value.trim();
+
+        if (!targetPhone || !goal) {
+            this.showAlert("Please enter both a phone number and a goal.");
+            return;
+        }
+
+        responseArea.innerHTML = '<span class="response-spinner"></span> Dispatching call... please wait.';
         
         try {
             const response = await fetch(`${this.API_BASE_URL}/ai/ask`, {
@@ -195,15 +203,15 @@ class ClientApp {
                     'Authorization': `Bearer ${token}` 
                 },
                 body: JSON.stringify({
-                    targetPhone: "555-0199",
-                    goal: "Promote the BCIT CST program, ask for feedback, and invite them to an info session."
+                    targetPhone: targetPhone,
+                    goal: goal
                 })
             });
             
             const data = await response.json();
             
             if(response.ok) {
-                this.showAlert(data.message, false);
+                this.showAlert('Call Dispatched!', false);
                 
                 responseArea.innerText = data.transcript;
                 
@@ -213,8 +221,8 @@ class ClientApp {
                 localStorage.setItem('api_quota', data.api_calls_remaining);
                 
             } else {
-                this.showAlert(data.error || 'API call failed');
-                responseArea.innerText = "Error: " + (data.error || 'Failed to connect to AI');
+                this.showAlert(data.error || 'Failed to dispatch call');
+                responseArea.innerText = "Error: " + (data.error || 'Check server logs');
                 
                 if(response.status === 401 || response.status === 403 && data.error.includes("expired")) {
                     this.handleLogout(); 
@@ -222,7 +230,7 @@ class ClientApp {
             }
         } catch (error) {
             console.error("Fetch Error:", error);
-            this.showAlert('Error calling API. Is the server running?');
+            this.showAlert('Network Error. Is the server running?');
             responseArea.innerText = "Network Error: Could not reach the server.";
         }
     }

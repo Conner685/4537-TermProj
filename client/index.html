@@ -42,6 +42,15 @@
                 <h4>API Calls Remaining</h4>
                 <p id="api-quota-display" class="quota-number">...</p>
             </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label for="target-phone" style="display: block; font-weight: bold; margin-bottom: 5px; color: #667eea;">Target Phone Number</label>
+                <input type="text" id="target-phone" placeholder="e.g., +16045550199 (Must include +1)" required style="margin-top: 0;">
+                
+                <label for="ai-goal" style="display: block; font-weight: bold; margin-bottom: 5px; margin-top: 15px; color: #667eea;">Conversation Goal</label>
+                <textarea id="ai-goal" placeholder="e.g., Act as a dentist receptionist and remind them of their appointment tomorrow at 2 PM." required style="margin-top: 0; min-height: 80px;"></textarea>
+            </div>
+
             <button id="test-api-btn">Test AI Endpoint (Consumes 1 call)</button>
             <div id="response-area"></div>
         </section>
