@@ -24,24 +24,36 @@ class AiController {
             }
 
             try {
-                const response = await fetch('https://api.bland.ai/v1/calls', {
+                const response = await fetch('https://api.vapi.ai/call/phone', {
                     method: 'POST',
                     headers: {
-                        'authorization': process.env.BLAND_API_KEY,
+                        'Authorization': `Bearer ${process.env.VAPI_API_KEY}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        phone_number: targetPhone,
-                        task: `You are a professional virtual phone assistant. Your goal is: ${goal}`,
-                        voice: "nat", 
-
-                        webhook: "https://four537-termproj-server.onrender.com/api/webhook/call-complete"
+                        phoneNumberId: process.env.VAPI_PHONE_ID,
+                        customer: {
+                            number: targetPhone
+                        },
+                        assistant: {
+                            firstMessage: "Hello, I am calling on behalf of the AI project.",
+                            model: {
+                                provider: "openai",
+                                model: "gpt-3.5-turbo",
+                                messages: [
+                                    { 
+                                        role: "system", 
+                                        content: `You are a professional virtual phone assistant. Your goal is: ${goal}` 
+                                    }
+                                ]
+                            }
+                        }
                     })
                 });
 
                 const data = await response.json();
 
-                if (data.status !== "success") {
+                if (!response.ok) {
                     throw new Error(data.message || 'Telephony API rejected the call.');
                 }
 
@@ -53,16 +65,14 @@ class AiController {
 
                     res.status(200).json({
                         message: 'Phone call dispatched successfully! The AI is calling now.',
-                        transcript: `Call ID: ${data.call_id}\n\nThe AI is currently calling ${targetPhone}. Awaiting completion...`,
+                        transcript: `Call ID: ${data.id}\n\nThe AI is currently calling ${targetPhone} via Vapi. Awaiting completion...`,
                         api_calls_remaining: newQuota
                     });
                 });
 
             } catch (error) {
                 console.error("Telephony API Error:", error.message);
-                res.status(500).json({ 
-                    error: `Telephony API Error: ${error.message}` 
-                });
+                res.status(500).json({ error: `Telephony API Error: ${error.message}` });
             }
         });
     }
